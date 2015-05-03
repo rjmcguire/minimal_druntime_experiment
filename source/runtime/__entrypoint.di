@@ -1,0 +1,1 @@
+module __entrypoint;
