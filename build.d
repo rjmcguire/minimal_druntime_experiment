@@ -107,9 +107,17 @@ void main(string[] args)
             break;
             
         case "ldc":
-            writeln("LDC support isn't currently implemented");
+            if (target != targets.linux)
+            {
+                writeln("LDC cannot build for target '" ~ cast(string)target ~ "`");
+                return;
+            }
+            else
+            {
+                writeln("LDC is currently not supported due to https://github.com/ldc-developers/ldc/issues/781");
+                return;
+            }
             compilerExecutable = "ldc2";
-            return;
             break;
             
         default:
@@ -125,6 +133,7 @@ void main(string[] args)
     {
         case "dmd":
             cmd = compilerExecutable ~ " -c -defaultlib= -boundscheck=off";
+            cmd ~= " -release";          // to get rid of module asserts
             cmd ~= " -betterC";          // no ModuleInfo
             cmd ~= " -I" ~ runtimeDir;
             cmd ~= " -I" ~ phobosDir;
@@ -133,7 +142,7 @@ void main(string[] args)
             break;
             
         case "gdc":
-            cmd ~= compilerExecutable ~ " -c -nophoboslib -nostdinc";
+            cmd = compilerExecutable ~ " -c -nophoboslib -nostdinc";
             cmd ~= " -fno-bounds-check -fno-in -fno-out -fno-invariants -fno-emit-moduleinfo";
             cmd ~= " -I " ~ runtimeDir;
             cmd ~= " -I " ~ phobosDir;
@@ -142,7 +151,11 @@ void main(string[] args)
             break;
             
         case "ldc":
-            cmd = compilerExecutable ~ " -c -singleobj -defaultlib= ";
+            cmd = compilerExecutable ~ " -c -singleobj -defaultlib= -boundscheck=off";
+            cmd ~= " -I" ~ runtimeDir;
+            cmd ~= " -I" ~ phobosDir;
+            cmd ~= " -I" ~ buildPath(portDir, "runtime");
+            cmd ~= " -I" ~ buildPath(portDir, "phobos");
             break;
             
         default:

@@ -76,7 +76,26 @@ class TypeInfo_Class : TypeInfo
 {
     version(D_LP64)
     {
-        ubyte[136] ignore;
+        // LDC seems to check the number of fields
+        version(LDC)  
+        {
+            ubyte[125] ignore;
+            ubyte[1] ignore1;
+            ubyte[1] ignore2;
+            ubyte[1] ignore3;
+            ubyte[1] ignore4;
+            ubyte[1] ignore5;
+            ubyte[1] ignore6;
+            ubyte[1] ignore7;
+            ubyte[1] ignore8;
+            ubyte[1] ignore9;
+            ubyte[1] ignore10;
+            ubyte[1] ignore11;
+        }
+        else
+        {
+            ubyte[136] ignore;
+        }
     }
     else
     {
@@ -140,6 +159,24 @@ class TypeInfo_Const : TypeInfo
     else
     {
         ubyte[4] ignore;
+    }
+}
+
+// Only LDC seems to require this
+version(LDC)
+{
+    class TypeInfo_AssociativeArray : TypeInfo
+    {
+        //TypeInfo value;
+        //TypeInfo key;
+        version(D_LP64)
+        {
+            ubyte[16] ignore;
+        }
+        else
+        {
+            ubyte[8] ignore;
+        }
     }
 }
 
