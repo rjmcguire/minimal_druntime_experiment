@@ -9,9 +9,12 @@ This implementation discourages exposing platform bindings through the runtime a
 
 ```
 d
-??? phobos
-??? ??? std
-??? runtime
+├── phobos
+│   └── std
+└── runtime
+    └── rt
+        └── typeinfo
+
 ```
 
 The implementation of the D language is in the [`d`](https://github.com/JinShil/minimal_druntime_experiment/tree/master/source/d) folder.  There one can find two subfolders [`d/phobos`](https://github.com/JinShil/minimal_druntime_experiment/tree/master/source/d/phobos) and [`d/runtime`](https://github.com/JinShil/minimal_druntime_experiment/tree/master/source/d/runtime) implementing the D standard library (Phobos), and the D runtime respectively.  However, those implementations have "system calls" (for lack of a better word) that must be implemented by the ports.  At the moment, for the sake of demonstration, only 2 system calls have been defined:
@@ -22,19 +25,20 @@ Each port, then implements those system calls as required by the underlying plat
 
 ```
 ports
-??? arm
-??? ??? cortexm4
-???     ??? phobos
-???     ??? ??? phobosPort.d
-???     ??? runtime
-???         ??? runtimePort.d
-??? posix
-??? ??? linux
-???     ??? phobos
-???     ??? ??? phobosPort.d
-???     ??? runtime
-???         ??? c_types.d
-???         ??? runtimePort.d
+├── arm
+│   └── cortexm4
+│       ├── phobos
+│       │   └── phobosPort.d
+│       └── runtime
+│           └── runtimePort.d
+├── posix
+│   └── linux
+│       ├── phobos
+│       │   └── phobosPort.d
+│       └── runtime
+│           ├── c_types.d
+│           └── runtimePort.d
+
 ```
 
 `phobosPort.d` provides the necessary system calls to for Phobos and `runtimePort.d` provides the necessary system calls for the D runtime.  
