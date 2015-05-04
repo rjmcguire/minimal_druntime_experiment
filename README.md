@@ -52,8 +52,8 @@ The syntax of the build command is:
 ```
 rdmd build.d compiler portDir
 ```
-*compiler* can be `dmd`, `gdc`, or `ldc`
-*portDir* is the folder containing the phobos/runtime port
+* *compiler* can be `dmd`, `gdc`, or `ldc`
+* *portDir* is the folder containing the phobos/runtime port
 
 Example.
 `rdmd build gdc posix/linux` - build using the Linux port using the DMD compiler 
