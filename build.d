@@ -55,13 +55,13 @@ void main(string[] args)
     enum targets
     {
         linux = "linux",
-        cortexm = "cortexm",
+        cortexm4 = "cortexm4",
         unknown = "unknown"
     }
     targets target = targets.unknown;
-    if (!args[2].find("arm" ~ dirSeparator ~ "cortex-m").empty)
+    if (!args[2].find("arm" ~ dirSeparator ~ "cortexm4").empty)
     {
-        target = target.cortexm;
+        target = target.cortexm4;
     }
     else if (!args[2].find("posix" ~ dirSeparator ~ "linux").empty)
     {
@@ -95,7 +95,7 @@ void main(string[] args)
                     compilerExecutable = "gdc";
                     break;
                     
-                case targets.cortexm:
+                case targets.cortexm4:
                     compilerExecutable = "arm-none-eabi-gdc";
                     break;
                     
@@ -109,7 +109,7 @@ void main(string[] args)
         case "ldc":
             if (target != targets.linux)
             {
-                writeln("LDC cannot build for target '" ~ cast(string)target ~ "`");
+                writeln("LDC support for target '" ~ cast(string)target ~ "` has not yet been implemented");
                 return;
             }
             else
@@ -144,10 +144,15 @@ void main(string[] args)
         case "gdc":
             cmd = compilerExecutable ~ " -c -nophoboslib -nostdinc";
             cmd ~= " -fno-bounds-check -fno-in -fno-out -fno-invariants -fno-emit-moduleinfo";
+            cmd ~= " -fdata-sections -ffunction-sections";
             cmd ~= " -I " ~ runtimeDir;
             cmd ~= " -I " ~ phobosDir;
             cmd ~= " -I " ~ buildPath(portDir, "runtime");
             cmd ~= " -I " ~ buildPath(portDir, "phobos");
+            if (target == targets.cortexm4)
+            {
+                cmd ~= " -mthumb -mcpu=cortex-m4";
+            }
             break;
             
         case "ldc":
@@ -219,8 +224,12 @@ void main(string[] args)
             linkerCmd = "ld -o " ~ outputFile ~ " " ~ objectFiles.join(" ");
             break;
             
-        case targets.cortexm:
+        case targets.cortexm4:
             linkerCmd = "arm-none-eabi-ld -o " ~ outputFile ~ " " ~ objectFiles.join(" ");
+            if (target == targets.cortexm4)
+            {
+                linkerCmd ~= " -Tsource/STM32F29ZIT6.ld --gc-sections";
+            }
             break;
             
         default:
