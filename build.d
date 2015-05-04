@@ -7,81 +7,248 @@ import std.path;
 import std.process;
 import std.stdio;
 
+bool execute(string cmd)
+{
+    writeln(cmd);
+    return system(cmd) == 0;
+    //return r.status == 0;
+}
+
 void main(string[] args)
 {
-    if (args.length < 2)
+    // Ensure we have the right number of arguments
+    if (args.length < 3)
     {
-        writeln("Usage: rdmd build.d {compiler} {compilerArgs}");
+        writeln("Usage: rdmd build.d compiler portDir");
         return;
     }
     
-    //TODO create object dir
-    
-    auto portsDir  = "ports";
+    // enumerate the directory structure
     auto sourceDir = "source";
-    auto binaryDir = "bin";
-    auto appDir = "app";
-    auto outputFile = buildPath(binaryDir, "test");
+    auto ddir = buildPath(sourceDir, "d");
+    auto runtimeDir = buildPath(ddir, "runtime");
+    auto phobosDir = buildPath(ddir, "phobos");
+    auto portsDir = buildPath(sourceDir, "ports");
+    auto portDir = buildPath(portsDir, args[2]);
     
-    string cmd = "rm -f outputFile";
-    system(cmd);
+    if (!exists(portDir))
+    {
+        writeln("Directory '" ~ portDir ~ "' does not exist.");
+        return;
+    }
+    
+    auto objDir = "obj";
+    auto outDir = "bin";
 
-    cmd = "";
+    //make sure intermediate and output directories exists
+    if (!exists(objDir))
+    {
+        mkdir(objDir);
+    }
+    
+    if (!exists(outDir))
+    {
+        mkdir(outDir);
+    }
+    
+    // determine target
+    enum targets
+    {
+        linux = "linux",
+        cortexm = "cortexm",
+        unknown = "unknown"
+    }
+    targets target = targets.unknown;
+    if (!args[2].find("arm" ~ dirSeparator ~ "cortex-m").empty)
+    {
+        target = target.cortexm;
+    }
+    else if (!args[2].find("posix" ~ dirSeparator ~ "linux").empty)
+    {
+        target = targets.linux;
+    }
+    
+    if (target == targets.unknown)
+    {
+        writeln("Could not determine target from '" ~ args[2] ~ "'.");
+        return;
+    }
+    
+    // determine compiler executable
+    auto compilerExecutable = "";
+
     switch(args[1])
     {
         case "dmd":
-            cmd = "dmd -defaultlib= -L-nodefaultlibs -L-nostdlib";
+            if (target != targets.linux)
+            {
+                writeln("DMD cannot build for target '" ~ cast(string)target ~ "`");
+                return;
+            }
+            compilerExecutable = "dmd";
             break;
             
         case "gdc":
-            // __entrypoint.di must exist or gdc won't compile
-            cmd =  "touch include/__entrypoint.di";
-            cmd ~= "; gdc -nophoboslib -nostdinc -nodefaultlibs -nostdlib -Iinclude";
+            switch(target)
+            {
+                case targets.linux:
+                    compilerExecutable = "gdc";
+                    break;
+                    
+                case targets.cortexm:
+                    compilerExecutable = "arm-none-eabi-gdc";
+                    break;
+                    
+                default:
+                    writeln("Building with GDC for target '" ~ cast(string)target ~ "'is not yet supported");
+                    return;
+                    break;
+            }
             break;
             
         case "ldc":
-            cmd = "ldc2 -c -singleobj -defaultlib= ";
+            writeln("LDC support isn't currently implemented");
+            compilerExecutable = "ldc2";
+            return;
             break;
             
         default:
-            writeln("Uknown compiler: ", args[1]);
+            writeln("Uknown compiler, '" ~ args[1] ~ "'");
             return;
+            break;
+    
+    }
+
+    // create compiler command
+    auto cmd = "";
+    switch(args[1])
+    {
+        case "dmd":
+            cmd = compilerExecutable ~ " -c -defaultlib= -boundscheck=off";
+            cmd ~= " -betterC";          // no ModuleInfo
+            cmd ~= " -I" ~ runtimeDir;
+            cmd ~= " -I" ~ phobosDir;
+            cmd ~= " -I" ~ buildPath(portDir, "runtime");
+            cmd ~= " -I" ~ buildPath(portDir, "phobos");
+            break;
+            
+        case "gdc":
+            cmd ~= compilerExecutable ~ " -c -nophoboslib -nostdinc";
+            cmd ~= " -fno-bounds-check -fno-in -fno-out -fno-invariants -fno-emit-moduleinfo";
+            cmd ~= " -I " ~ runtimeDir;
+            cmd ~= " -I " ~ phobosDir;
+            cmd ~= " -I " ~ buildPath(portDir, "runtime");
+            cmd ~= " -I " ~ buildPath(portDir, "phobos");
+            break;
+            
+        case "ldc":
+            cmd = compilerExecutable ~ " -c -singleobj -defaultlib= ";
+            break;
+            
+        default:
             break;
     }
     
-    for(int i = 2; i < args.length; i++)
+    // add user supplied arguments
+    for(int i = 3; i < args.length; i++)
     {
         cmd ~= " " ~ args[i];
     }
     
-    cmd ~= " " ~ sourceDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
-    cmd ~= " " ~ portsDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
-    cmd ~= " " ~ appDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
-                  
-    switch(args[1])
+    //rm all object files
+    execute("rm -rf " ~ objDir ~ dirSeparator ~ "*.o");
+    
+    // collect source files to compile
+    auto sourceFiles = runtimeDir.dirEntries("*.d", SpanMode.depth).array 
+        ~ phobosDir.dirEntries("*.d", SpanMode.depth).array
+        ~ portDir.dirEntries("*.d", SpanMode.depth).array
+        ~ sourceDir.dirEntries("*.d", SpanMode.shallow).array;
+        
+    // for collecting object files to link later
+    string[] objectFiles;
+        
+    // compile each source file to an object file
+    foreach(sourceFile; sourceFiles)
+    {        
+        auto thisCmd = cmd ~ " " ~ sourceFile.name;
+        auto objectFile = buildPath(objDir, sourceFile.name.replace(dirSeparator, "_") ~ ".o");
+        objectFiles ~= objectFile;
+        switch(args[1])
+        {
+            case "dmd":
+                thisCmd ~= " -of" ~ objectFile;
+                break;
+                
+            case "gdc":
+                thisCmd ~= " -o " ~ objectFile;
+                break;
+                
+            case "ldc":
+                thisCmd ~= " -of=" ~ objectFile;
+                break;
+                
+            default:
+                break;
+        }
+        
+        if (!execute(thisCmd))
+        {
+            return;
+        }
+    }
+    
+    // generate linker command
+    auto linkerCmd = "";
+    auto outputFile = buildPath(outDir, "main");
+    switch(target)
     {
-        case "dmd":
-            cmd ~= " -of" ~ outputFile;
+        case targets.linux:
+            linkerCmd = "ld -o " ~ outputFile ~ " " ~ objectFiles.join(" ");
             break;
             
-        case "gdc":
-            cmd ~= " -o " ~ outputFile;
-            
-            // remove __entrypoint.di since it what just needed for compilation
-            cmd ~= "; rm include/__entrypoint.di";  
-            break;
-            
-        case "ldc":
-            cmd ~= " -of=" ~ outputFile;
+        case targets.cortexm:
+            linkerCmd = "arm-none-eabi-ld -o " ~ outputFile ~ " " ~ objectFiles.join(" ");
             break;
             
         default:
+            writeln("Can't determine which linker to use.");
             break;
-            
-    }
-            
-    writeln(cmd);
-    system(cmd);
     
-    //TODO create binary dir
+    }
+    
+    //rm all object files
+    execute("rm -rf " ~ outDir ~ dirSeparator ~ "*");
+    
+    // link
+    execute(linkerCmd);
+
+//     cmd ~= " " ~ sourceDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
+//     cmd ~= " " ~ portsDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
+//     cmd ~= " " ~ appDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
+//                   
+//     switch(args[1])
+//     {
+//         case "dmd":
+//             cmd ~= " -of" ~ outputFile;
+//             break;
+//             
+//         case "gdc":
+//             cmd ~= " -o " ~ outputFile;
+//             
+//             // remove __entrypoint.di since it what just needed for compilation
+//             cmd ~= "; rm include/__entrypoint.di";  
+//             break;
+//             
+//         case "ldc":
+//             cmd ~= " -of=" ~ outputFile;
+//             break;
+//             
+//         default:
+//             break;
+//             
+//     }
+            
+//     writeln(cmd);
+//     system(cmd);
+    
 }

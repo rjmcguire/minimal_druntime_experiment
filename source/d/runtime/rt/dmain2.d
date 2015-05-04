@@ -2,11 +2,11 @@ module dmain;
 
 version(D_LP64)
 {
-    extern __d_sys_exit(long code);
+    extern(C) extern void __d_sys_exit(long code);
 }
 else
 {
-    extern __d_sys_exit(int code);
+    extern(C) extern void __d_sys_exit(int code);
 }
 
 private alias extern(C) int function(char[][] args) MainFunc;

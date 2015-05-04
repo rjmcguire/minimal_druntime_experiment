@@ -5,20 +5,20 @@ import c_types;
 // can be found in druntime (rt/dmain2.d)
 extern(C) int main(int argc, char** argv);
 
-void __d_sys_exit(c_int arg1) nothrow
+extern(C) void __d_sys_exit(c_int arg1) nothrow
 {
     version(D_LP64)
     {
         version(DigitalMars)
         {
-            asm
+            asm nothrow
             {
                 mov RAX, 60;
                 mov RDI, arg1;
                 syscall;
-            }
+            } 
         }
-        version(GNU)
+        else version(GNU)
         {
             asm 
             {
@@ -29,9 +29,10 @@ void __d_sys_exit(c_int arg1) nothrow
                 : "memory", "cc", "rcx", "r11";  // announce to the compiler that the memory and condition codes 
                                                  // have been modified, kernel may clopper rcx and r11
             } 
+        }
         else
         {
-            static assert(false, "__d_sys_exit only supports GDC");
+            static assert(false, "__d_sys_exit only supports DMD and GDC");
         }
     }
     else
@@ -45,4 +46,16 @@ private extern(C) void _start()
 {
     int ret = main(0, null);
     __d_sys_exit(ret);
+}
+
+version(DigitalMars)
+{
+    // seems to be only used for linux, and only on 64-bit
+    version(D_LP64)
+    {
+        extern(C) void _d_dso_registry(void* data)
+        {
+
+        }
+    }
 }

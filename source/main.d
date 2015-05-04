@@ -2,7 +2,8 @@ module main;
 
 import std.stdio;
 
-//To ensure structs compile
+// Just a test to ensure structs compile
+//******************************************************************************
 struct TestStruct
 {
     immutable string testMemberVar = "struct member";
@@ -13,16 +14,17 @@ struct TestStruct
     }
 }
 
-//To ensure classes compile
-//Only static right now, as we don't want to reqire dynamic memory allocation
-//in this runtime.  It eventually should be added, but we still need to work out
-//the details
+// Just a test to ensure classes compile
+// Only static right now, as we don't want to reqire dynamic memory allocation
+// in this runtime.  Dynamic memory allocation should definitely be added,
+// but we still need to work out the details
+//******************************************************************************
 class TestClass
 {
     static immutable string testMemberVar = "class member";
     
     static void testMethod()
-    [
+    {
         writeln(testMemberVar);
     }
 }

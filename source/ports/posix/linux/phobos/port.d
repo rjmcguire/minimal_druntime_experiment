@@ -2,13 +2,24 @@ module stdLibPort;
 
 import c_types;
 
-__d_sys_write(c_int arg1, in void* arg2, c_int arg3) nothrow
+extern(C) c_int __d_sys_write(c_int arg1, in void* arg2, c_int arg3) nothrow
 {
     ssize_t result;
     
     version(D_LP64)
     {
-        version(GNU)
+        version(DigitalMars)
+        {
+            asm nothrow
+            {
+                mov RAX, 1;
+                mov RDI, arg1;
+                mov RSI, arg2;
+                mov RDX, arg3;
+                syscall;
+            }
+        }
+        else version(GNU)
         {
             asm
             {
@@ -25,7 +36,7 @@ __d_sys_write(c_int arg1, in void* arg2, c_int arg3) nothrow
         }
         else
         {
-            static assert(false, "__d_sys_write only supports GDC");
+            static assert(false, "__d_sys_write only supports DMD and GDC");
         }
     }
     else
