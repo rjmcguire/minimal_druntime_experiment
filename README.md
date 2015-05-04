@@ -56,8 +56,8 @@ rdmd build.d compiler portDir
 * *portDir* is the folder containing the phobos/runtime port
 
 Example.
-`rdmd build gdc posix/linux` - build using the Linux port using the DMD compiler 
-`rdmd build gdc posix/linux` - build using the Linux port using the GDC compiler
-`rdmd build gdc arm/cortexm4` - build using the ARM Cortex-M4 port using the GDC compiler.
+* `rdmd build gdc posix/linux` - build using the Linux port using the DMD compiler 
+* `rdmd build gdc posix/linux` - build using the Linux port using the GDC compiler
+* `rdmd build gdc arm/cortexm4` - build using the ARM Cortex-M4 port using the GDC compiler.
 
 Currently, those are the only build commands implemented.  The `rdmd build gdc arm/cortexm4` build command will build for the [STM32F29I Discovery Board](http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/PF259090)
