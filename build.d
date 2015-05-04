@@ -234,34 +234,5 @@ void main(string[] args)
     
     // link
     execute(linkerCmd);
-
-//     cmd ~= " " ~ sourceDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
-//     cmd ~= " " ~ portsDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
-//     cmd ~= " " ~ appDir.dirEntries("*.d", SpanMode.depth).map!"a.name".join(" ");
-//                   
-//     switch(args[1])
-//     {
-//         case "dmd":
-//             cmd ~= " -of" ~ outputFile;
-//             break;
-//             
-//         case "gdc":
-//             cmd ~= " -o " ~ outputFile;
-//             
-//             // remove __entrypoint.di since it what just needed for compilation
-//             cmd ~= "; rm include/__entrypoint.di";  
-//             break;
-//             
-//         case "ldc":
-//             cmd ~= " -of=" ~ outputFile;
-//             break;
-//             
-//         default:
-//             break;
-//             
-//     }
-            
-//     writeln(cmd);
-//     system(cmd);
     
 }
