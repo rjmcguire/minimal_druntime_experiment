@@ -4,7 +4,9 @@ An experiment to define the scope, feasibility, and architecural design details 
 ## Overview
 There was recently a discussion about how we could create a portable, pay-as-you-go, D runtime to help bring the promise of D to free-standing platforms and devices with tight resource constraints (e.g. microcontrollers).  Thread started here:  http://forum.dlang.org/post/mhrs4p$31id$1@digitalmars.com
 
-To keep that momentum going, prove the concept, and provide a place to start and discuss ideas, I created the most minimal D runtime I could.  I've also included phobos, so we could still have `std.stdio.write` and `std.stdio.writeln` for console output, as every device needs a console for development.
+The primary motivation is to create an arm-none-eabi GDC cross-compiler toolchain for programming ARM Cortex-M microcontrollers in D, but I think there's a way to achieve broader platform support by delegating implementation details down the "supply chain".  I hope to articulate that strategy in this post.
+
+To prove the concept, provide a place to start, and discuss ideas, I created the most minimal D runtime I could.  I've also included Phobos, so we could still have `std.stdio.write` and `std.stdio.writeln` for console output, as every device needs a console for development.
 
 ```
 d
