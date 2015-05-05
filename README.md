@@ -57,7 +57,7 @@ Users are not expected to use this code directly.  Rather, I envision toolchain,
 * the C library bindings from Deimos
 * multilibs from the GNU toolchain.
 
-A silicon vendor like ST, may then take that package and add more platform-specific for their family of products:
+A silicon vendor like ST, may then take that package and add more platform-specific code and tools for their family of products:
 
 * startup files with interrupt vectors for their peripherals
 * linker scripts for each of their MCUs
