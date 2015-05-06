@@ -76,21 +76,21 @@ class TypeInfo_Class : TypeInfo
 {
     version(D_LP64)
     {
-        // LDC seems to check the number of fields
+        // See https://github.com/ldc-developers/ldc/issues/781
         version(LDC)  
         {
-            ubyte[125] ignore;
-            ubyte[1] ignore1;
-            ubyte[1] ignore2;
-            ubyte[1] ignore3;
-            ubyte[1] ignore4;
-            ubyte[1] ignore5;
-            ubyte[1] ignore6;
-            ubyte[1] ignore7;
-            ubyte[1] ignore8;
-            ubyte[1] ignore9;
-            ubyte[1] ignore10;
-            ubyte[1] ignore11;
+            byte[]                init;
+            string                name;
+            void*[]               vtbl;
+            void*[]               interfaces;
+            TypeInfo_Class        base;
+            void*                 destructor;
+            void function(Object) classInvariant;
+            uint                  m_flags;
+            void*                 deallocator;
+            void*[]               m_offTi;
+            void function(Object) defaultConstructor;  
+            immutable(void)*      m_RTInfo;           
         }
         else
         {

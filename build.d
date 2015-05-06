@@ -112,11 +112,6 @@ void main(string[] args)
                 writeln("LDC support for target '" ~ cast(string)target ~ "` has not yet been implemented");
                 return;
             }
-            else
-            {
-                writeln("LDC is currently not supported due to https://github.com/ldc-developers/ldc/issues/781");
-                return;
-            }
             compilerExecutable = "ldc2";
             break;
             
@@ -156,11 +151,12 @@ void main(string[] args)
             break;
             
         case "ldc":
-            cmd = compilerExecutable ~ " -c -singleobj -defaultlib= -boundscheck=off";
-            cmd ~= " -I" ~ runtimeDir;
-            cmd ~= " -I" ~ phobosDir;
-            cmd ~= " -I" ~ buildPath(portDir, "runtime");
-            cmd ~= " -I" ~ buildPath(portDir, "phobos");
+            cmd = compilerExecutable ~ " -c -singleobj -defaultlib= ";
+            cmd ~= " -release -boundscheck=off";
+            cmd ~= " -I=" ~ runtimeDir;
+            cmd ~= " -I=" ~ phobosDir;
+            cmd ~= " -I=" ~ buildPath(portDir, "runtime");
+            cmd ~= " -I=" ~ buildPath(portDir, "phobos");
             break;
             
         default:

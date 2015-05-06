@@ -5,13 +5,14 @@ import c_types;
 // can be found in druntime (rt/dmain2.d)
 extern(C) int main(int argc, char** argv);
 
-extern(C) void __d_sys_exit(c_int arg1) nothrow
+// can't make this nothrow due to https://github.com/ldc-developers/ldc/issues/925
+extern(C) void __d_sys_exit(c_int arg1)
 {
     version(D_LP64)
     {
         version(DigitalMars)
         {
-            asm nothrow
+            asm
             {
                 mov RAX, 60;
                 mov RDI, arg1;
@@ -30,9 +31,18 @@ extern(C) void __d_sys_exit(c_int arg1) nothrow
                                                  // have been modified, kernel may clopper rcx and r11
             } 
         }
-        else
+        else version(LDC)
         {
-            static assert(false, "__d_sys_exit only supports DMD and GDC");
+            import ldc.llvmasm;
+            
+            __asm
+            (
+                "syscall", 
+                "{rax},
+                {rdi},,
+                ~{memory},~{cc},~{rcx},~{r11}", 
+                60, arg1
+            );
         }
     }
     else
@@ -49,6 +59,15 @@ private extern(C) void _start()
 }
 
 version(DigitalMars)
+{
+    version = NeedsDSORegistry;
+}
+else version(LDC)
+{
+    version = NeedsDSORegistry;
+}
+
+version(NeedsDSORegistry)
 {
     // seems to be only used for linux, and only on 64-bit
     version(D_LP64)

@@ -1,8 +1,9 @@
 module phobosPort;
 
-import c_types;
+private import c_types;
 
-extern(C) c_int __d_sys_write(c_int arg1, in void* arg2, c_int arg3) nothrow
+// can't make this nothrow due to https://github.com/ldc-developers/ldc/issues/925
+private extern(C) c_int __d_sys_write(c_int arg1, in void* arg2, c_int arg3) 
 {
     ssize_t result;
     
@@ -10,7 +11,7 @@ extern(C) c_int __d_sys_write(c_int arg1, in void* arg2, c_int arg3) nothrow
     {
         version(DigitalMars)
         {
-            asm nothrow
+            asm 
             {
                 mov RAX, 1;
                 mov RDI, arg1;
@@ -34,9 +35,21 @@ extern(C) c_int __d_sys_write(c_int arg1, in void* arg2, c_int arg3) nothrow
                                                  // have been modified, kernel may clopper rcx and r11
             } 
         }
-        else
+        else version(LDC)
         {
-            static assert(false, "__d_sys_write only supports DMD and GDC");
+            import ldc.llvmasm;
+            
+            result = __asm!c_int
+            (
+                "syscall", 
+                "={rax},
+                {rax},
+                {rdi},
+                {rsi},
+                {rdx},
+                ~{memory},~{cc},~{rcx},~{r11}", 
+                1, arg1, arg2, arg3
+            );
         }
     }
     else

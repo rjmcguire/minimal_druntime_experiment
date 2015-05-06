@@ -6,7 +6,7 @@ import std.stdio;
 //******************************************************************************
 struct TestStruct
 {
-    immutable string testMemberVar = "struct member";
+    static immutable string testMemberVar = "struct member";
     
     void testMethod()
     {
