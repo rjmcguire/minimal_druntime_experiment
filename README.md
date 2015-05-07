@@ -85,5 +85,6 @@ Example.
 * `rdmd build gdc posix/linux` - build using the Linux port using the GDC compiler
 * `rdmd build ldc posix/linux` - build using the Linux port using the LDC compiler
 * `rdmd build gdc arm/cortexm4` - build using the ARM Cortex-M4 port using the GDC compiler.
+* `rdmd build ldc arm/cortexm4` - build using the ARM Cortex-M4 port using the LDC compiler.
 
-Currently, those are the only build commands implemented.  The `rdmd build gdc arm/cortexm4` build command will build for the [STM32F29I Discovery Board](http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/PF259090)
+Currently, those are the only build commands implemented.  The `rdmd build gdc/ldc arm/cortexm4` build command will build for the [STM32F29I Discovery Board](http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/PF259090)
