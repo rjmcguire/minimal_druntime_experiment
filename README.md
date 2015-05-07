@@ -10,26 +10,26 @@ To prove the concept, provide a place to start, and discuss ideas, I created the
 
 ```
 d
-├── phobos
-│   └── std
-└── runtime
-    └── rt
-        └── typeinfo
+????????? phobos
+???   ????????? std
+????????? runtime
+    ????????? rt
+        ????????? typeinfo
 
 ports
-├── arm
-│   └── cortexm4
-│       ├── phobosWe
-│       │   └── phobosPort.d
-│       └── runtime
-│           └── runtimePort.d
-├── posix
-│   └── linux
-│       ├── phobos
-│       │   └── phobosPort.d
-│       └── runtime
-│           ├── c_types.d
-│           └── runtimePort.d
+????????? arm
+???   ????????? cortexm4
+???       ????????? phobosWe
+???       ???   ????????? phobosPort.d
+???       ????????? runtime
+???           ????????? runtimePort.d
+????????? posix
+???   ????????? linux
+???       ????????? phobos
+???       ???   ????????? phobosPort.d
+???       ????????? runtime
+???           ????????? c_types.d
+???           ????????? runtimePort.d
 ```
 
 There are two main folders: "d" and "ports".  "d" provides the patform-agnostic code, or code that is relevant to a large number of platforms.  The "ports" directory provides the platform-specific implementation.  Building simply requires importing "d/runtime", "d/phobos", and your platform's hierarchy in the "ports" folder.  At the moment, I've only implemented a Linux 64-bit port and an ARM Cortex-M4 port to illustrate the concept.  This is roughly how I wish the official runtime could be structured in the spirit of [Issue 11666](https://issues.dlang.org/show_bug.cgi?id=11666).
@@ -81,8 +81,9 @@ rdmd build.d compiler portDir
 * *portDir* is the folder containing the phobos/runtime port
 
 Example.
-* `rdmd build gdc posix/linux` - build using the Linux port using the DMD compiler 
+* `rdmd build dmd posix/linux` - build using the Linux port using the DMD compiler 
 * `rdmd build gdc posix/linux` - build using the Linux port using the GDC compiler
+* `rdmd build ldc posix/linux` - build using the Linux port using the LDC compiler
 * `rdmd build gdc arm/cortexm4` - build using the ARM Cortex-M4 port using the GDC compiler.
 
 Currently, those are the only build commands implemented.  The `rdmd build gdc arm/cortexm4` build command will build for the [STM32F29I Discovery Board](http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/PF259090)
