@@ -107,11 +107,6 @@ void main(string[] args)
             break;
             
         case "ldc":
-            if (target != targets.linux)
-            {
-                writeln("LDC support for target '" ~ cast(string)target ~ "` has not yet been implemented");
-                return;
-            }
             compilerExecutable = "ldc2";
             break;
             
@@ -158,6 +153,10 @@ void main(string[] args)
             cmd ~= " -I=" ~ buildPath(portDir, "runtime");
             cmd ~= " -I=" ~ buildPath(portDir, "phobos");
             cmd ~= " -I=ldc";
+            if (target == targets.cortexm4)
+            {
+                cmd ~= " -march=thumb -mcpu=cortex-m4";
+            }
             break;
             
         default:

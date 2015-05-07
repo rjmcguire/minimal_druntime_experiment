@@ -74,31 +74,29 @@ class TypeInfo_Interface : TypeInfo
 
 class TypeInfo_Class : TypeInfo 
 {
-    version(D_LP64)
+    // See https://github.com/ldc-developers/ldc/issues/781
+    version(LDC)  
     {
-        // See https://github.com/ldc-developers/ldc/issues/781
-        version(LDC)  
-        {
-            byte[]                init;
-            string                name;
-            void*[]               vtbl;
-            void*[]               interfaces;
-            TypeInfo_Class        base;
-            void*                 destructor;
-            void function(Object) classInvariant;
-            uint                  m_flags;
-            void*                 deallocator;
-            void*[]               m_offTi;
-            void function(Object) defaultConstructor;  
-            immutable(void)*      m_RTInfo;           
-        }
-        else
-        {
-            ubyte[136] ignore;
-        }
+        byte[]                init;
+        string                name;
+        void*[]               vtbl;
+        void*[]               interfaces;
+        TypeInfo_Class        base;
+        void*                 destructor;
+        void function(Object) classInvariant;
+        uint                  m_flags;
+        void*                 deallocator;
+        void*[]               m_offTi;
+        void function(Object) defaultConstructor;  
+        immutable(void)*      m_RTInfo;           
+    }
+    else version(D_LP64)
+    {
+        ubyte[136] ignore;
     }
     else
     {
+        
         ubyte[68] ignore;
     }
 }
