@@ -13,8 +13,17 @@
  */
 module rt.typeinfo.ti_byte;
 
-// Only DMD needs these to compile
+// Only DMD and LDC need this to compile
 version(DigitalMars)
+{
+    version = NeedsTypeInfog;
+}
+version(LDC)
+{
+    version = NeedsTypeInfog;
+}
+
+version(NeedsTypeInfog)
 {
     class TypeInfo_g : TypeInfo
     {

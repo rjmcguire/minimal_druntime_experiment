@@ -127,7 +127,7 @@ void main(string[] args)
     switch(args[1])
     {
         case "dmd":
-            cmd = compilerExecutable ~ " -c -defaultlib= -boundscheck=off";
+            cmd = compilerExecutable ~ " -c -conf= -boundscheck=off";
             cmd ~= " -release";          // to get rid of module asserts
             cmd ~= " -betterC";          // no ModuleInfo
             cmd ~= " -I" ~ runtimeDir;
@@ -151,12 +151,13 @@ void main(string[] args)
             break;
             
         case "ldc":
-            cmd = compilerExecutable ~ " -c -singleobj -defaultlib= ";
-            cmd ~= " -release -boundscheck=off";
+            cmd = compilerExecutable ~ " -c ";
+            cmd ~= " -release";
             cmd ~= " -I=" ~ runtimeDir;
             cmd ~= " -I=" ~ phobosDir;
             cmd ~= " -I=" ~ buildPath(portDir, "runtime");
             cmd ~= " -I=" ~ buildPath(portDir, "phobos");
+            cmd ~= " -I=ldc";
             break;
             
         default:
@@ -180,6 +181,12 @@ void main(string[] args)
         
     // for collecting object files to link later
     string[] objectFiles;
+    
+    // because we need to prevent LDC from importing the default runtime
+    if(args[1] == "ldc")
+    {
+        execute("touch ldc2.conf");
+    }
         
     // compile each source file to an object file
     foreach(sourceFile; sourceFiles)
@@ -209,6 +216,12 @@ void main(string[] args)
         {
             return;
         }
+    }
+    
+    // Don't need it anymore
+    if(args[1] == "ldc")
+    {
+        execute("rm ldc2.conf");
     }
     
     // generate linker command

@@ -39,7 +39,7 @@ extern(C) void __d_sys_exit(c_int arg1)
             (
                 "syscall", 
                 "{rax},
-                {rdi},,
+                {rdi},
                 ~{memory},~{cc},~{rcx},~{r11}", 
                 60, arg1
             );
@@ -77,4 +77,22 @@ version(NeedsDSORegistry)
 
         }
     }
+}
+
+//Needed by LDC's _Dmain
+version(LDC)
+{
+    extern(C) void* memset(void* dest, int value, size_t num)
+    {
+        // naive implementation for the moment.  Eventually,
+        // this should be implemented in assembly
+        
+        byte* d = cast(byte*)dest;
+        for(int i = 0; i < num; i++)
+        {
+            d[i] = cast(byte)value;
+        }
+        
+        return dest;
+    } 
 }
