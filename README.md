@@ -19,7 +19,7 @@ d
 ports
 ├── arm
 │   └── cortexm4
-│       ├── phobosWe
+│       ├── phobos
 │       │   └── phobosPort.d
 │       └── runtime
 │           └── runtimePort.d
