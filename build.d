@@ -111,7 +111,7 @@ void main(string[] args)
             break;
             
         default:
-            writeln("Uknown compiler, '" ~ args[1] ~ "'");
+            writeln("Unknown compiler, '" ~ args[1] ~ "'");
             return;
             break;
     
